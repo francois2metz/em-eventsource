@@ -2,7 +2,14 @@ require "eventmachine"
 require "em-http-request"
 
 module EventMachine
+  # EventSource
+  # dev.w3.org/html5/eventsource/
   class EventSource
+    # Create a new stream
+    #
+    # @param [String] url
+    # @param [Hash] query
+    # @param [Hash] headers
     def initialize(url, query={}, headers={})
       @url = url
       @query = query
@@ -17,15 +24,20 @@ module EventMachine
       @on = {}
     end
 
-    def on(type, &block)
-      @on[type] = [] if @on[type].nil?
-      @on[type] << block
+    # Add a specific event handler
+    #
+    # @param [String] name of event
+    def on(name, &block)
+      @on[name] = [] if @on[name].nil?
+      @on[name] << block
     end
 
+    # Add message event handler
     def message(&block)
       @messages << block
     end
 
+    # Add error event handler
     def error(&block)
       @errors << block
     end

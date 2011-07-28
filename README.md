@@ -1,15 +1,34 @@
 # EventSource client for EventMachine
 
-    source = EM::EventSource.new ("/live/meeting", {:start => 0})
+This is currently a work in progress.
 
-    source.message do |message|
+See the specification: http://dev.w3.org/html5/eventsource/
+
+# How to use it
+
+Install with Rubygems:
+
+    gem install em-eventsource
+
+If you use bundler, add it to your Gemfile:
+
+    gem "em-ucengine", "~>0.0.1"
+
+Then, you can use it in your code:
+
+    require "em-eventsource"
+
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming")
+
+      source.message do |message|
+        puts "new message |message|"
+        source.close
+      end
+
+      source.start # Start listening
     end
 
-    source.error do |error|
-    end
+# Credits
 
-    source.on "plop" do |message|
-    end
-
-    source.start
-    source.close
+Copyright (c) 2011 af83
