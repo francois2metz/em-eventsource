@@ -81,7 +81,6 @@ module EventMachine
       end
     end
 
-    # TODO: handle retry
     def handle_stream(stream)
       event = []
       name = nil
@@ -94,6 +93,11 @@ module EventMachine
         end
         /^event:(.+)$/.match(part) do |m|
           name = m[1].strip
+        end
+        /^retry:(.+)$/.match(part) do |m|
+          if m[1].strip! =~ /^[0-9]+$/
+            @retry = m[1].to_i
+          end
         end
       end
       if name.nil?

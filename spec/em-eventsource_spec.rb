@@ -80,4 +80,19 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "handle retry event" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming")
+      source.start
+      req = source.instance_variable_get "@req"
+      req.stream_data("retry: plop\n\n")
+      source.instance_variable_get("@retry").must_be :==, 3
+      req.stream_data("retry: 45plop\n\n")
+      source.instance_variable_get("@retry").must_be :==, 3
+      req.stream_data("retry: 45\n\n")
+      source.instance_variable_get("@retry").must_be :==, 45
+      EM.stop
+    end
+  end
+
 end
