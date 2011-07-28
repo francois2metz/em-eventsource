@@ -31,6 +31,14 @@ module EventMachine
       @streams.each { |stream| stream.call(data) }
     end
 
+    def call_errback
+      @errors.each { |error| error.call() }
+    end
+
+    def call_headers(headers)
+      @headers.each { |header| header.call(headers) }
+    end
+
     def close
 
     end
