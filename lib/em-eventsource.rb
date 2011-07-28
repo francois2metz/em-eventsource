@@ -18,6 +18,7 @@ module EventMachine
     end
 
     def on(type, &block)
+      @on[type] = [] if @on[type].nil?
       @on[type] << block
     end
 
@@ -60,7 +61,7 @@ module EventMachine
         while index = stream.index("\n")
           subpart = stream[0..index]
           /^data: (.+)$/.match(subpart) do |m|
-            @block.call(m[1])
+            @messages.each { |message| message.call(m[1]) }
           end
           /^id: (.+)$/.match(subpart) do |m|
             @lastid = m[1]
@@ -77,6 +78,7 @@ module EventMachine
       conn = EM::HttpRequest.new(@url)
       conn.get({ :query => @query,
                  :head  => {'Last-Event-Id' => @lastid }.merge(@headers)})
+      conn
     end
   end
 end
