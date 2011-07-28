@@ -20,18 +20,46 @@ describe EventMachine::EventSource do
     EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
       source.message do |message|
-        message.must_be :==, 'hello world'
+        message.must_be :==, "hello world"
         source.close
         EM.stop
       end
       source.start
       req = source.instance_variable_get "@req"
-      req.stream_data("data: hello world\n")
+      req.stream_data("data: hello world\n\n")
+    end
+  end
+
+  it "handle multiple messages" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming")
+      source.message do |message|
+        message.must_be :==, "hello world\nplop"
+        source.close
+        EM.stop
+      end
+      source.start
+      req = source.instance_variable_get "@req"
+      req.stream_data("data: hello world\ndata:plop\n\n")
+    end
+  end
+
+  it "handle event name" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming")
+      source.on "plop" do |message|
+        message.must_be :==, "hello world"
+        source.close
+        EM.stop
+      end
+      source.start
+      req = source.instance_variable_get "@req"
+      req.stream_data("data: hello world\nevent:plop\n\n")
     end
   end
 
   it "reconnect after error" do
-     EM.run do
+    EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
       source.start
       req = source.instance_variable_get "@req"

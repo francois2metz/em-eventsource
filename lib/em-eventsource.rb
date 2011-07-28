@@ -70,24 +70,39 @@ module EventMachine
       stream = ""
       @req.stream do |chunk|
         stream += chunk
-        while index = stream.index("\n")
+        while index = stream.index("\n\n")
           subpart = stream[0..index]
-          /^data: (.+)$/.match(subpart) do |m|
-            @messages.each { |message| message.call(m[1]) }
-          end
-          /^id: (.+)$/.match(subpart) do |m|
-            @lastid = m[1]
-          end
-          # TODO: handle retry
-          # TODO: handle event
-          # TODO: multiline data
+          handle_stream(subpart)
           stream = stream[(index + 1)..stream.length]
         end
       end
     end
 
+    # TODO: handle retry
+    def handle_stream(stream)
+      event = []
+      name = nil
+      stream.split("\n").each do |part|
+        /^data:(.+)$/.match(part) do |m|
+          event << m[1].strip
+        end
+        /^id:(.+)$/.match(part) do |m|
+          @lastid = m[1].strip
+        end
+        /^event:(.+)$/.match(part) do |m|
+          name = m[1].strip
+        end
+      end
+      if name.nil?
+        @messages.each { |message| message.call(event.join("\n")) }
+      else
+        @on[name].each  { |message| message.call(event.join("\n")) } if not @on[name].nil?
+      end
+    end
+
     def prepare_request
       conn = EM::HttpRequest.new(@url)
+      # TODO: add Cache-Control: no-cache
       conn.get({ :query => @query,
                  :head  => {'Last-Event-Id' => @lastid }.merge(@headers)})
       conn

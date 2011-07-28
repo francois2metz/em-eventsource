@@ -22,11 +22,15 @@ Then, you can use it in your code:
       source = EventMachine::EventSource.new("http://example.com/streaming")
 
       source.message do |message|
-        puts "new message |message|"
-        source.close
+        puts "new message #{message}"
+      end
+
+      source.on "eventname" do |message|
+          puts "eventname #{message}"
       end
 
       source.start # Start listening
+      #source.close
     end
 
 # Credits
