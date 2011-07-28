@@ -64,12 +64,14 @@ module EventMachine
           listen
         end
       end
+      # TODO: manage content-type
       @req.headers do |headers|
         p headers
       end
       stream = ""
       @req.stream do |chunk|
         stream += chunk
+        # TODO: manage \r, \r\n, \n
         while index = stream.index("\n\n")
           subpart = stream[0..index]
           handle_stream(subpart)
