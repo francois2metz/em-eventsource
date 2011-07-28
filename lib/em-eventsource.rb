@@ -105,9 +105,10 @@ module EventMachine
 
     def prepare_request
       conn = EM::HttpRequest.new(@url)
-      # TODO: add Cache-Control: no-cache
+      headers = @headers.merge({'Cache-Control' => 'no-cache'})
+      headers.merge!({'Last-Event-Id' => @lastid }) if not @lastid.nil?
       conn.get({ :query => @query,
-                 :head  => {'Last-Event-Id' => @lastid }.merge(@headers)})
+                 :head  => headers})
       conn
     end
   end

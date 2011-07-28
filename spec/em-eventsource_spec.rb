@@ -6,12 +6,14 @@ require "minitest/autorun"
 describe EventMachine::EventSource do
   it "connect to the good server" do
     EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"}, {"DNT" => 1})
+      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
+                                             {"DNT" => 1})
       source.start
       req = source.instance_variable_get "@req"
       req.url.must_be :==, "http://example.com/streaming"
       req.get_args[0].must_be :==, { :query => { :chuck => "norris"},
-                                     :head  => { "Last-Event-Id" => nil, "DNT" => 1} }
+                                     :head  => { "DNT" => 1,
+                                                 "Cache-Control" => "no-cache"} }
       EM.stop
     end
   end
@@ -58,15 +60,19 @@ describe EventMachine::EventSource do
     end
   end
 
-  it "reconnect after error" do
+  it "reconnect after error with last-event-id" do
     EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
       source.start
       req = source.instance_variable_get "@req"
+      req.stream_data("id: roger\n\n")
       source.error do
         EM.add_timer(4) do
           req2 = source.instance_variable_get "@req"
           refute_same(req2, req)
+          req2.get_args[0].must_be :==, { :head  => { "Last-Event-Id" => "roger" ,
+                                                      "Cache-Control" => "no-cache" },
+                                          :query => {} }
           EM.stop
         end
       end
