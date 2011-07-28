@@ -60,6 +60,7 @@ module EventMachine
       @req = prepare_request
       @req.errback do
         next if @canceled
+        @errors.each { |error| error.call() }
         EM.add_timer(@retry) do
           listen
         end
@@ -98,7 +99,7 @@ module EventMachine
       if name.nil?
         @messages.each { |message| message.call(event.join("\n")) }
       else
-        @on[name].each  { |message| message.call(event.join("\n")) } if not @on[name].nil?
+        @on[name].each { |message| message.call(event.join("\n")) } if not @on[name].nil?
       end
     end
 

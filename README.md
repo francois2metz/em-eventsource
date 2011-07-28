@@ -26,7 +26,11 @@ Then, you can use it in your code:
       end
 
       source.on "eventname" do |message|
-          puts "eventname #{message}"
+        puts "eventname #{message}"
+      end
+
+      source.error do
+        puts "error"
       end
 
       source.start # Start listening

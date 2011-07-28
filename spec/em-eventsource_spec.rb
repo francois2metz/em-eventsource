@@ -63,12 +63,14 @@ describe EventMachine::EventSource do
       source = EventMachine::EventSource.new("http://example.com/streaming")
       source.start
       req = source.instance_variable_get "@req"
-      req.call_errback
-      EM.add_timer(4) do
-        req2 = source.instance_variable_get "@req"
-        refute_same(req2, req)
-        EM.stop
+      source.error do
+        EM.add_timer(4) do
+          req2 = source.instance_variable_get "@req"
+          refute_same(req2, req)
+          EM.stop
+        end
       end
+      req.call_errback
     end
   end
 
