@@ -4,52 +4,56 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require "minitest/autorun"
 
 describe EventMachine::EventSource do
-  it "connect to the good server" do
+
+  def start_source(url="http://example.com/streaming", query={}, headers={})
     EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
-                                             {"DNT" => 1})
+      source = EventMachine::EventSource.new(url, query, headers)
       source.start
       req = source.instance_variable_get "@req"
+      yield source, req if block_given?
+    end
+  end
+
+  it "connect to the good server" do
+    start_source do |source, req|
       req.url.must_be :==, "http://example.com/streaming"
-      req.get_args[0].must_be :==, { :query => { :chuck => "norris"},
-                                     :head  => { "DNT" => 1,
-                                                 "Cache-Control" => "no-cache"} }
+      req.get_args[0].must_be :==, { :query => {},
+                                     :head  => {"Cache-Control" => "no-cache"} }
+      EM.stop
+    end
+  end
+
+  it "connect to the good server with query and headers" do
+    start_source "http://example.net/streaming", {:chuck => "norris"}, {"DNT" => 1} do |source, req|
+      req.url.must_be :==, "http://example.net/streaming"
+      req.get_args[0].must_be :==, { :query => {:chuck => "norris"},
+                                     :head  => {"DNT" => 1, "Cache-Control" => "no-cache"} }
       EM.stop
     end
   end
 
   it "connect and error if the content-type doens't match text/event-stream" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
-                                             {"DNT" => 1})
-      source.start
+    start_source do |source, req|
       source.error do |error|
-        error.must_equal "The content-type '' is not text/event-stream"
+        error.must_equal "The content-type 'text/plop' is not text/event-stream"
         EM.stop
       end
-      req = source.instance_variable_get "@req"
       req.call_headers "CONTENT_TYPE" => "text/plop"
     end
   end
 
   it "connect and error if the content-type is not set" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
-                                             {"DNT" => 1})
-      source.start
+    start_source do |source, req|
       source.error do |error|
-        error.must_equal "The content-type 'text/plop' is not text/event-stream"
+        error.must_equal "The content-type '' is not text/event-stream"
         EM.stop
       end
-      req = source.instance_variable_get "@req"
       req.call_headers "HEADER_NAME" => "BAD"
     end
   end
 
  it "connect without error with good content-type" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
-                                             {"DNT" => 1})
+    start_source do |source, req|
       source.start
       source.error do
         assert false
@@ -58,58 +62,45 @@ describe EventMachine::EventSource do
         assert true
         EM.stop
       end
-      req = source.instance_variable_get "@req"
       req.call_headers "CONTENT_TYPE" => "text/event-stream; charset=utf-8"
     end
   end
 
   it "connect and handle message" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
+    start_source do |source, req|
       source.message do |message|
         message.must_be :==, "hello world"
         source.close
         EM.stop
       end
-      source.start
-      req = source.instance_variable_get "@req"
       req.stream_data("data: hello world\n\n")
     end
   end
 
   it "handle multiple messages" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
+    start_source do |source, req|
       source.message do |message|
         message.must_be :==, "hello world\nplop"
         source.close
         EM.stop
       end
-      source.start
-      req = source.instance_variable_get "@req"
       req.stream_data("data: hello world\ndata:plop\n\n")
     end
   end
 
   it "handle event name" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
+    start_source do |source, req|
       source.on "plop" do |message|
         message.must_be :==, "hello world"
         source.close
         EM.stop
       end
-      source.start
-      req = source.instance_variable_get "@req"
       req.stream_data("data: hello world\nevent:plop\n\n")
     end
   end
 
   it "reconnect after error with last-event-id" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
-      source.start
-      req = source.instance_variable_get "@req"
+    start_source do |source, req|
       req.stream_data("id: roger\n\n")
       source.error do |error|
         error.must_equal "Connection lost. Reconnecting."
@@ -127,10 +118,7 @@ describe EventMachine::EventSource do
   end
 
   it "handle retry event" do
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
-      source.start
-      req = source.instance_variable_get "@req"
+    start_source do |source ,req|
       req.stream_data("retry: plop\n\n")
       source.instance_variable_get("@retry").must_be :==, 3
       req.stream_data("retry: 45plop\n\n")
