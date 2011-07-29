@@ -19,9 +19,14 @@ module EventMachine
       @lastid = nil
       @retry = 3 # seconds
 
+      @opens = []
       @errors = []
       @messages = []
       @on = {}
+    end
+
+    def open(&block)
+      @opens << block
     end
 
     # Add a specific event handler
@@ -60,14 +65,18 @@ module EventMachine
       @req = prepare_request
       @req.errback do
         next if @canceled
-        @errors.each { |error| error.call() }
+        @errors.each { |error| error.call("Connection lost. Reconnecting.") }
         EM.add_timer(@retry) do
           listen
         end
       end
-      # TODO: manage content-type
       @req.headers do |headers|
-        p headers
+        if /^text\/event-stream/.match headers['CONTENT_TYPE']
+          @opens.each { |open| open.call() }
+        else
+          @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
+          close
+        end
       end
       stream = ""
       @req.stream do |chunk|

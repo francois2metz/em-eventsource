@@ -21,6 +21,10 @@ Then, you can use it in your code:
     EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
 
+      source.open do
+          puts "opened"
+      end
+
       source.message do |message|
         puts "new message #{message}"
       end
@@ -29,8 +33,8 @@ Then, you can use it in your code:
         puts "eventname #{message}"
       end
 
-      source.error do
-        puts "error"
+      source.error do |error|
+        puts "error #{error}"
       end
 
       source.start # Start listening

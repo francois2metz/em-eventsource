@@ -18,6 +18,51 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "connect and error if the content-type doens't match text/event-stream" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
+                                             {"DNT" => 1})
+      source.start
+      source.error do |error|
+        error.must_equal "The content-type '' is not text/event-stream"
+        EM.stop
+      end
+      req = source.instance_variable_get "@req"
+      req.call_headers "CONTENT_TYPE" => "text/plop"
+    end
+  end
+
+  it "connect and error if the content-type is not set" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
+                                             {"DNT" => 1})
+      source.start
+      source.error do |error|
+        error.must_equal "The content-type 'text/plop' is not text/event-stream"
+        EM.stop
+      end
+      req = source.instance_variable_get "@req"
+      req.call_headers "HEADER_NAME" => "BAD"
+    end
+  end
+
+ it "connect without error with good content-type" do
+    EM.run do
+      source = EventMachine::EventSource.new("http://example.com/streaming", {:chuck => "norris"},
+                                             {"DNT" => 1})
+      source.start
+      source.error do
+        assert false
+      end
+      source.open do
+        assert true
+        EM.stop
+      end
+      req = source.instance_variable_get "@req"
+      req.call_headers "CONTENT_TYPE" => "text/event-stream; charset=utf-8"
+    end
+  end
+
   it "connect and handle message" do
     EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
@@ -66,7 +111,8 @@ describe EventMachine::EventSource do
       source.start
       req = source.instance_variable_get "@req"
       req.stream_data("id: roger\n\n")
-      source.error do
+      source.error do |error|
+        error.must_equal "Connection lost. Reconnecting."
         EM.add_timer(4) do
           req2 = source.instance_variable_get "@req"
           refute_same(req2, req)
