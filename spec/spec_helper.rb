@@ -13,6 +13,7 @@ module EventMachine
 
     def get(*args)
       @get_args = args
+      return self
     end
 
     def stream(&block)

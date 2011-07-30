@@ -140,7 +140,6 @@ module EventMachine
       headers.merge!({'Last-Event-Id' => @lastid }) if not @lastid.nil?
       conn.get({ :query => @query,
                  :head  => headers})
-      conn
     end
   end
 end
