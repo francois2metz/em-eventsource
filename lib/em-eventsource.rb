@@ -92,14 +92,13 @@ module EventMachine
           @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
         end
       end
-      stream = ""
+      buffer = ""
       @req.stream do |chunk|
-        stream += chunk
+        buffer += chunk
         # TODO: manage \r, \r\n, \n
-        while index = stream.index("\n\n")
-          subpart = stream[0..index]
-          handle_stream(subpart)
-          stream = stream[(index + 1)..stream.length]
+        while index = buffer.index("\n\n")
+          stream = buffer.slice!(0..index)
+          handle_stream(stream)
         end
       end
     end
