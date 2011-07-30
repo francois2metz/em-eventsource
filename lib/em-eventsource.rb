@@ -5,6 +5,8 @@ module EventMachine
   # EventSource
   # dev.w3.org/html5/eventsource/
   class EventSource
+    # Get APi url
+    attr_reader :url
     # Create a new stream
     #
     # @param [String] url
@@ -25,6 +27,7 @@ module EventMachine
       @on = {}
     end
 
+    # Add open event handler
     def open(&block)
       @opens << block
     end

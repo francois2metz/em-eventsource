@@ -16,6 +16,7 @@ describe EventMachine::EventSource do
 
   it "connect to the good server" do
     start_source do |source, req|
+      source.url.must_be :==, "http://example.com/streaming"
       req.url.must_be :==, "http://example.com/streaming"
       req.get_args[0].must_be :==, { :query => {},
                                      :head  => {"Cache-Control" => "no-cache"} }
