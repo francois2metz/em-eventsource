@@ -5,8 +5,17 @@ module EventMachine
   # EventSource
   # dev.w3.org/html5/eventsource/
   class EventSource
-    # Get APi url
+    # Get API url
     attr_reader :url
+    # Get ready state
+    attr_reader :ready_state
+    # Ready state
+    # The connection has not yet been established, or it was closed and the user agent is reconnecting.
+    CONNECTING = 0
+    # The user agent has an open connection and is dispatching events as it receives them.
+    OPEN       = 1
+    # The connection is not open, and the user agent is not trying to reconnect. Either there was a fatal error or the close() method was invoked.
+    CLOSED     = 2
     # Create a new stream
     #
     # @param [String] url
@@ -16,8 +25,8 @@ module EventMachine
       @url = url
       @query = query
       @headers = headers
+      @ready_state = CLOSED
 
-      @closed = false
       @lastid = nil
       @retry = 3 # seconds
 
@@ -52,13 +61,13 @@ module EventMachine
 
     # Start subscription
     def start
-      @closed = false
+      @ready_state = CONNECTING
       listen
     end
 
     # Cancel subscription
     def close
-      @closed = true
+      @ready_state = CLOSED
       @req.close
     end
 
@@ -67,7 +76,8 @@ module EventMachine
     def listen
       @req = prepare_request
       @req.errback do
-        next if @canceled
+        next if @ready_state == CLOSED
+        @ready_state = CONNECTING
         @errors.each { |error| error.call("Connection lost. Reconnecting.") }
         EM.add_timer(@retry) do
           listen
@@ -75,10 +85,11 @@ module EventMachine
       end
       @req.headers do |headers|
         if /^text\/event-stream/.match headers['CONTENT_TYPE']
+          @ready_state = OPEN
           @opens.each { |open| open.call() }
         else
-          @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
           close
+          @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
         end
       end
       stream = ""

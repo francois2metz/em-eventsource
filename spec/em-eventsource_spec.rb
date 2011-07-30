@@ -16,6 +16,7 @@ describe EventMachine::EventSource do
 
   it "connect to the good server" do
     start_source do |source, req|
+      source.ready_state.must_equal EM::EventSource::CONNECTING
       source.url.must_be :==, "http://example.com/streaming"
       req.url.must_be :==, "http://example.com/streaming"
       req.get_args[0].must_be :==, { :query => {},
@@ -37,6 +38,7 @@ describe EventMachine::EventSource do
     start_source do |source, req|
       source.error do |error|
         error.must_equal "The content-type 'text/plop' is not text/event-stream"
+        source.ready_state.must_equal EM::EventSource::CLOSED
         EM.stop
       end
       req.call_headers "CONTENT_TYPE" => "text/plop"
@@ -60,6 +62,7 @@ describe EventMachine::EventSource do
         assert false
       end
       source.open do
+        source.ready_state.must_equal EM::EventSource::OPEN
         assert true
         EM.stop
       end
@@ -105,6 +108,7 @@ describe EventMachine::EventSource do
       req.stream_data("id: roger\n\n")
       source.error do |error|
         error.must_equal "Connection lost. Reconnecting."
+        source.ready_state.must_equal EM::EventSource::CONNECTING
         EM.add_timer(4) do
           req2 = source.instance_variable_get "@req"
           refute_same(req2, req)
