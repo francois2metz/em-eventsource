@@ -14,6 +14,13 @@ describe EventMachine::EventSource do
     end
   end
 
+  def create_response_headers(status, content_type="", other={})
+    headers = EM::HttpResponseHeader.new
+    headers.http_status = status
+    headers['CONTENT_TYPE'] = content_type
+    headers.merge!(other)
+  end
+
   it "connect to the good server" do
     start_source do |source, req|
       source.ready_state.must_equal EM::EventSource::CONNECTING
@@ -34,6 +41,18 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "connect and error if status != 200" do
+    start_source do |source, req|
+      source.error do |error|
+        error.must_equal "Unexpected response status 400"
+        source.ready_state.must_equal EM::EventSource::CLOSED
+        EM.stop
+      end
+      source.open { assert false }
+      req.call_headers(create_response_headers "400")
+    end
+  end
+
   it "connect and error if the content-type doens't match text/event-stream" do
     start_source do |source, req|
       source.error do |error|
@@ -41,7 +60,7 @@ describe EventMachine::EventSource do
         source.ready_state.must_equal EM::EventSource::CLOSED
         EM.stop
       end
-      req.call_headers "CONTENT_TYPE" => "text/plop"
+      req.call_headers(create_response_headers "200", "text/plop")
     end
   end
 
@@ -51,11 +70,11 @@ describe EventMachine::EventSource do
         error.must_equal "The content-type '' is not text/event-stream"
         EM.stop
       end
-      req.call_headers "HEADER_NAME" => "BAD"
+      req.call_headers(create_response_headers "200", "", "HEADER_NAME" => "BAD")
     end
   end
 
- it "connect without error with good content-type" do
+ it "connect without error with 200 and good content-type" do
     start_source do |source, req|
       source.start
       source.error do
@@ -66,7 +85,7 @@ describe EventMachine::EventSource do
         assert true
         EM.stop
       end
-      req.call_headers "CONTENT_TYPE" => "text/event-stream; charset=utf-8"
+      req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
     end
   end
 

@@ -84,9 +84,14 @@ module EventMachine
         end
       end
       @req.headers do |headers|
+        if headers.status != 200
+          close
+          @errors.each { |error| error.call("Unexpected response status #{headers.status}") }
+          next
+        end
         if /^text\/event-stream/.match headers['CONTENT_TYPE']
           @ready_state = OPEN
-          @opens.each { |open| open.call() }
+          @opens.each { |open| open.call }
         else
           close
           @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
