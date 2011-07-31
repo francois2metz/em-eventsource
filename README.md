@@ -4,7 +4,7 @@ This is currently a work in progress.
 
 See the specification: http://dev.w3.org/html5/eventsource/
 
-# How to use it
+## Install
 
 Install with Rubygems:
 
@@ -14,33 +14,45 @@ If you use bundler, add it to your Gemfile:
 
     gem "em-ucengine", "~>0.0.1"
 
-Then, you can use it in your code:
+## Usage
+
+Basic usage:
 
     require "em-eventsource"
-
     EM.run do
       source = EventMachine::EventSource.new("http://example.com/streaming")
-
-      source.open do
-          puts "opened"
-      end
-
       source.message do |message|
         puts "new message #{message}"
       end
-
-      source.on "eventname" do |message|
-        puts "eventname #{message}"
-      end
-
-      source.error do |error|
-        puts "error #{error}"
-      end
-
       source.start # Start listening
-      #source.close
     end
 
-# Credits
+Listening specific event name:
+
+    source.on "eventname" do |message|
+      puts "eventname #{message}"
+    end
+
+Handle error:
+
+    source.error do |error|
+      puts "error #{error}"
+    end
+
+Handle open stream:
+
+    source.open do
+      puts "opened"
+    end
+
+Close the stream:
+
+    source.close
+
+Current status of the connection:
+
+    source.ready_state # Can be EM::EventSource::CLOSED, EM::EventSource::CONNECTING, EM::EventSource::OPEN
+
+## Credits
 
 Copyright (c) 2011 af83
