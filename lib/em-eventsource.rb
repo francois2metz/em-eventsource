@@ -51,7 +51,7 @@ module EventMachine
     #
     # @param [String] name of event
     def on(name, &block)
-      @on[name] = [] if @on[name].nil?
+      @on[name] ||= []
       @on[name] << block
     end
 
