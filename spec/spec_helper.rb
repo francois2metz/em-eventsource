@@ -13,7 +13,7 @@ module EventMachine
 
     def get(*args)
       @get_args = args
-      return self
+      self
     end
 
     def stream(&block)
@@ -41,7 +41,7 @@ module EventMachine
     end
 
     def close
-
+      # do nothing
     end
   end
 
