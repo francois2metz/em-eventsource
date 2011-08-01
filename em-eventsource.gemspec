@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 Gem::Specification.new do |s|
   s.name             = "em-eventsource"
   s.version          = "0.0.1"
