@@ -25,19 +25,19 @@ describe EventMachine::EventSource do
   it "connect to the good server" do
     start_source do |source, req|
       source.ready_state.must_equal EM::EventSource::CONNECTING
-      source.url.must_be :==, "http://example.com/streaming"
-      req.url.must_be :==, "http://example.com/streaming"
-      req.get_args[0].must_be :==, { :query => {},
-                                     :head  => {"Cache-Control" => "no-cache"} }
+      source.url.must_equal "http://example.com/streaming"
+      req.url.must_equal "http://example.com/streaming"
+      req.get_args[0].must_equal({ :query => {},
+                                   :head  => {"Cache-Control" => "no-cache"} })
       EM.stop
     end
   end
 
   it "connect to the good server with query and headers" do
     start_source "http://example.net/streaming", {:chuck => "norris"}, {"DNT" => 1} do |source, req|
-      req.url.must_be :==, "http://example.net/streaming"
-      req.get_args[0].must_be :==, { :query => {:chuck => "norris"},
-                                     :head  => {"DNT" => 1, "Cache-Control" => "no-cache"} }
+      req.url.must_equal "http://example.net/streaming"
+      req.get_args[0].must_equal({ :query => {:chuck => "norris"},
+                                   :head  => {"DNT" => 1, "Cache-Control" => "no-cache"} })
       EM.stop
     end
   end
@@ -93,7 +93,7 @@ describe EventMachine::EventSource do
   it "connect and handle message" do
     start_source do |source, req|
       source.message do |message|
-        message.must_be :==, "hello world"
+        message.must_equal "hello world"
         source.close
         EM.stop
       end
@@ -104,7 +104,7 @@ describe EventMachine::EventSource do
   it "handle multiple messages" do
     start_source do |source, req|
       source.message do |message|
-        message.must_be :==, "hello world\nplop"
+        message.must_equal "hello world\nplop"
         source.close
         EM.stop
       end
@@ -115,7 +115,7 @@ describe EventMachine::EventSource do
   it "handle event name" do
     start_source do |source, req|
       source.on "plop" do |message|
-        message.must_be :==, "hello world"
+        message.must_equal "hello world"
         source.close
         EM.stop
       end
@@ -132,10 +132,10 @@ describe EventMachine::EventSource do
         EM.add_timer(4) do
           req2 = source.instance_variable_get "@req"
           refute_same(req2, req)
-          source.last_event_id.must_be :==, "roger"
-          req2.get_args[0].must_be :==, { :head  => { "Last-Event-Id" => "roger",
-                                                      "Cache-Control" => "no-cache" },
-                                          :query => {} }
+          source.last_event_id.must_equal "roger"
+          req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                   "Cache-Control" => "no-cache" },
+                                        :query => {} })
           EM.stop
         end
       end
@@ -146,11 +146,11 @@ describe EventMachine::EventSource do
   it "handle retry event" do
     start_source do |source ,req|
       req.stream_data("retry: plop\n\n")
-      source.retry.must_be :==, 3
+      source.retry.must_equal 3
       req.stream_data("retry: 45plop\n\n")
-      source.retry.must_be :==, 3
+      source.retry.must_equal 3
       req.stream_data("retry: 45\n\n")
-      source.retry.must_be :==, 45
+      source.retry.must_equal 45
       EM.stop
     end
   end
