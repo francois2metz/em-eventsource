@@ -57,6 +57,10 @@ Override the default retry value (if the connection is lost):
 
     source.retry = 5 # in seconds
 
+Get Last-Event-Id value:
+
+    source.last_event_id
+
 ## Credits
 
 Copyright (c) 2011 af83

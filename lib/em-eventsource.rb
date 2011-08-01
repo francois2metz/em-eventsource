@@ -13,6 +13,8 @@ module EventMachine
     attr_reader :retry
     # Override retry value (in seconds)
     attr_writer :retry
+    # Get value of last event id
+    attr_reader :last_event_id
     # Ready state
     # The connection has not yet been established, or it was closed and the user agent is reconnecting.
     CONNECTING = 0
@@ -31,7 +33,7 @@ module EventMachine
       @headers = headers
       @ready_state = CLOSED
 
-      @lastid = nil
+      @last_event_id = nil
       @retry = 3 # seconds
 
       @opens = []
@@ -120,7 +122,7 @@ module EventMachine
           event << m[1].strip
         end
         /^id:(.+)$/.match(part) do |m|
-          @lastid = m[1].strip
+          @last_event_id = m[1].strip
         end
         /^event:(.+)$/.match(part) do |m|
           name = m[1].strip
@@ -141,7 +143,7 @@ module EventMachine
     def prepare_request
       conn = EM::HttpRequest.new(@url)
       headers = @headers.merge({'Cache-Control' => 'no-cache'})
-      headers.merge!({'Last-Event-Id' => @lastid }) if not @lastid.nil?
+      headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
       conn.get({ :query => @query,
                  :head  => headers})
     end

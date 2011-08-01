@@ -131,7 +131,8 @@ describe EventMachine::EventSource do
         EM.add_timer(4) do
           req2 = source.instance_variable_get "@req"
           refute_same(req2, req)
-          req2.get_args[0].must_be :==, { :head  => { "Last-Event-Id" => "roger" ,
+          source.last_event_id.must_be :==, "roger"
+          req2.get_args[0].must_be :==, { :head  => { "Last-Event-Id" => "roger",
                                                       "Cache-Control" => "no-cache" },
                                           :query => {} }
           EM.stop
