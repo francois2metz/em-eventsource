@@ -144,11 +144,11 @@ describe EventMachine::EventSource do
   it "handle retry event" do
     start_source do |source ,req|
       req.stream_data("retry: plop\n\n")
-      source.instance_variable_get("@retry").must_be :==, 3
+      source.retry.must_be :==, 3
       req.stream_data("retry: 45plop\n\n")
-      source.instance_variable_get("@retry").must_be :==, 3
+      source.retry.must_be :==, 3
       req.stream_data("retry: 45\n\n")
-      source.instance_variable_get("@retry").must_be :==, 45
+      source.retry.must_be :==, 45
       EM.stop
     end
   end

@@ -53,6 +53,10 @@ Current status of the connection:
 
     source.ready_state # Can be EM::EventSource::CLOSED, EM::EventSource::CONNECTING, EM::EventSource::OPEN
 
+Override the default retry value (if the connection is lost):
+
+    source.retry = 5 # in seconds
+
 ## Credits
 
 Copyright (c) 2011 af83

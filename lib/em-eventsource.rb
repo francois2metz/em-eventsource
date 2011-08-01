@@ -9,6 +9,10 @@ module EventMachine
     attr_reader :url
     # Get ready state
     attr_reader :ready_state
+    # Get current retry value (in seconds)
+    attr_reader :retry
+    # Override retry value (in seconds)
+    attr_writer :retry
     # Ready state
     # The connection has not yet been established, or it was closed and the user agent is reconnecting.
     CONNECTING = 0
