@@ -61,6 +61,10 @@ Get Last-Event-Id value:
 
     source.last_event_id
 
+Attach middleware:
+
+    source.use EM::Middleware::JSONResponse
+
 ## Credits
 
 Copyright (c) 2011 af83

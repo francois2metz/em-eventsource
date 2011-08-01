@@ -155,4 +155,16 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "add connection middlewares" do
+    start_source do |source ,req|
+      proc = Proc.new {}
+      source.use "oup", "la", "boom", &proc
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["oup", "la", "boom", proc]]
+      EM.stop
+    end
+  end
+
 end

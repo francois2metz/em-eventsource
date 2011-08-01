@@ -42,6 +42,7 @@ module EventMachine
       @errors = []
       @messages = []
       @on = {}
+      @middlewares = []
     end
 
     # Add open event handler
@@ -65,6 +66,11 @@ module EventMachine
     # Add error event handler
     def error(&block)
       @errors << block
+    end
+
+    # Add a middleware
+    def use(*args, &block)
+      @middlewares << (args << block)
     end
 
     # Start subscription
@@ -144,6 +150,10 @@ module EventMachine
 
     def prepare_request
       conn = EM::HttpRequest.new(@url)
+      @middlewares.each { |middleware|
+        block = middleware.pop
+        conn.use *middleware, &block
+      }
       headers = @headers.merge({'Cache-Control' => 'no-cache'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
       conn.get({ :query => @query,
