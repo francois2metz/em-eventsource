@@ -69,7 +69,7 @@ Attach middleware:
 
 MIT License
 
-Copyright (C) 2011 by Af83
+Copyright (C) 2011 by af83
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
