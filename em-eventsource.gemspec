@@ -7,7 +7,10 @@ Gem::Specification.new do |s|
   s.homepage         = "http://github.com/af83/em-eventsource"
   s.authors          = "François de Metz"
   s.email            = "francois.de.metz@af83.com"
-  s.description      =  File.read("README.md")
+  s.description      =  <<-EOF
+     em-eventsource is an eventmachine library to consume Server-Sent Events streaming API.
+     You can find the specification here: http://dev.w3.org/html5/eventsource/
+EOF
   s.summary          = "em-eventsource is an eventmachine library to consume Server-Sent Events streaming API."
   s.extra_rdoc_files = %w(README.md)
   s.files            = Dir["README.md", "Gemfile", "lib/**/*.rb"]
