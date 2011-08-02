@@ -7,10 +7,10 @@ Gem::Specification.new do |s|
   s.homepage         = "http://github.com/af83/em-eventsource"
   s.authors          = "François de Metz"
   s.email            = "francois.de.metz@af83.com"
-  s.description      = ""
-  s.summary          = ""
+  s.description      =  File.read("README.md")
+  s.summary          = "em-eventsource is an eventmachine library to consume Server-Sent Events streaming API."
   s.extra_rdoc_files = %w(README.md)
-  s.files            = Dir["LICENSE", "README.md", "Gemfile", "lib/**/*.rb"]
+  s.files            = Dir["README.md", "Gemfile", "lib/**/*.rb"]
   s.require_paths    = ["lib"]
   s.rubygems_version = %q{1.3.7}
   s.add_dependency "eventmachine", "1.0.0.beta3"
