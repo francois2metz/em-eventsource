@@ -123,11 +123,12 @@ module EventMachine
     end
 
     def handle_stream(stream)
-      event = []
+      data = ""
       name = nil
       stream.split("\n").each do |part|
         /^data:(.+)$/.match(part) do |m|
-          event << m[1].strip
+          data += m[1].strip
+          data += "\n"
         end
         /^id:(.+)$/.match(part) do |m|
           @last_event_id = m[1].strip
@@ -141,10 +142,12 @@ module EventMachine
           end
         end
       end
+      return if data.empty?
+      data.chomp!("\n")
       if name.nil?
-        @messages.each { |message| message.call(event.join("\n")) }
+        @messages.each { |message| message.call(data) }
       else
-        @on[name].each { |message| message.call(event.join("\n")) } if not @on[name].nil?
+        @on[name].each { |message| message.call(data) } if not @on[name].nil?
       end
     end
 

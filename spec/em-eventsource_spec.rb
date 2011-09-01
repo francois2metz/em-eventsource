@@ -112,6 +112,17 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "ignore empty message" do
+    start_source do |source, req|
+      source.message do |message|
+        message.must_equal "hello world"
+        EM.stop
+      end
+      req.stream_data(":\n\n")
+      req.stream_data("data: hello world\n\n")
+    end
+  end
+
   it "handle event name" do
     start_source do |source, req|
       source.on "plop" do |message|
