@@ -17,6 +17,10 @@ module EventMachine
     attr_writer :retry
     # Get value of last event id
     attr_reader :last_event_id
+    # Get the inactivity timeout
+    attr_reader :inactivity_timeout
+    # Set the inactivity timeout
+    attr_writer :inactivity_timeout
     # Ready state
     # The connection has not yet been established, or it was closed and the user agent is reconnecting.
     CONNECTING = 0
@@ -37,6 +41,7 @@ module EventMachine
 
       @last_event_id = nil
       @retry = 3 # seconds
+      @inactivity_timeout = 60 # seconds
 
       @opens = []
       @errors = []
@@ -152,7 +157,7 @@ module EventMachine
     end
 
     def prepare_request
-      conn = EM::HttpRequest.new(@url)
+      conn = EM::HttpRequest.new(@url, :inactivity_timeout => @inactivity_timeout)
       @middlewares.each { |middleware|
         block = middleware.pop
         conn.use *middleware, &block

@@ -2,14 +2,15 @@ require "em-eventsource"
 
 module EventMachine
   class MockHttpRequest
-    attr_reader :url, :get_args, :middlewares
+    attr_reader :url, :get_args, :middlewares, :opts
 
-    def initialize(url)
+    def initialize(url, opts={})
       @url = url
       @streams = []
       @errors = []
       @headers = []
       @middlewares = []
+      @opts = opts
     end
 
     def get(*args)
@@ -51,8 +52,8 @@ module EventMachine
   end
 
   class HttpRequest
-    def self.new(url)
-      EM::MockHttpRequest.new(url)
+    def self.new(url, opts={})
+      EM::MockHttpRequest.new(url, opts)
     end
   end
 end

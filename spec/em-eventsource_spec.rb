@@ -27,6 +27,7 @@ describe EventMachine::EventSource do
       source.ready_state.must_equal EM::EventSource::CONNECTING
       source.url.must_equal "http://example.com/streaming"
       req.url.must_equal "http://example.com/streaming"
+      req.opts[:inactivity_timeout].must_equal 60
       req.get_args[0].must_equal({ :query => {},
                                    :head  => {"Cache-Control" => "no-cache"} })
       EM.stop
@@ -77,7 +78,6 @@ describe EventMachine::EventSource do
 
  it "connect without error with 200 and good content-type" do
     start_source do |source, req|
-      source.start
       source.error do
         assert false
       end
@@ -174,6 +174,17 @@ describe EventMachine::EventSource do
       source.start
       req2 = source.instance_variable_get "@req"
       req2.middlewares.must_equal [["oup", "la", "boom", proc]]
+      EM.stop
+    end
+  end
+
+  it "allows to set the inactivity_timeout" do
+    EM.run do
+      source = EventMachine::EventSource.new("")
+      source.inactivity_timeout = 0
+      source.start
+      req = source.instance_variable_get "@req"
+      req.opts[:inactivity_timeout].must_equal 0
       EM.stop
     end
   end

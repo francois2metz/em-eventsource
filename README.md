@@ -83,6 +83,12 @@ Attach middleware:
 source.use EM::Middleware::JSONResponse
 ```
 
+Set the inactivity timeout. Set to 0 to disable the timeout.
+
+```ruby
+source.inactivity_timeout = 120 # in seconds (default: 60).
+```
+
 ## Licence
 
 MIT License
