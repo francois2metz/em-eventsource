@@ -18,52 +18,70 @@ If you use bundler, add it to your Gemfile:
 
 Basic usage:
 
-    require "em-eventsource"
-    EM.run do
-      source = EventMachine::EventSource.new("http://example.com/streaming")
-      source.message do |message|
-        puts "new message #{message}"
-      end
-      source.start # Start listening
-    end
+```ruby
+require "em-eventsource"
+EM.run do
+  source = EventMachine::EventSource.new("http://example.com/streaming")
+  source.message do |message|
+    puts "new message #{message}"
+  end
+  source.start # Start listening
+end
+```
 
 Listening specific event name:
 
-    source.on "eventname" do |message|
-      puts "eventname #{message}"
-    end
+```ruby
+source.on "eventname" do |message|
+  puts "eventname #{message}"
+end
+```
 
 Handle error:
 
-    source.error do |error|
-      puts "error #{error}"
-    end
+```ruby
+source.error do |error|
+  puts "error #{error}"
+end
+```
 
 Handle open stream:
 
-    source.open do
-      puts "opened"
-    end
+```ruby
+source.open do
+  puts "opened"
+end
+```
 
 Close the stream:
 
-    source.close
+```ruby
+source.close
+```
 
 Current status of the connection:
 
-    source.ready_state # Can be EM::EventSource::CLOSED, EM::EventSource::CONNECTING, EM::EventSource::OPEN
+```ruby
+source.ready_state # Can be EM::EventSource::CLOSED, EM::EventSource::CONNECTING, EM::EventSource::OPEN
+```
 
 Override the default retry value (if the connection is lost):
 
-    source.retry = 5 # in seconds
+```ruby
+source.retry = 5 # in seconds (default 3)
+```
 
 Get Last-Event-Id value:
 
-    source.last_event_id
+```ruby
+source.last_event_id
+```
 
 Attach middleware:
 
-    source.use EM::Middleware::JSONResponse
+```ruby
+source.use EM::Middleware::JSONResponse
+```
 
 ## Licence
 
