@@ -1,7 +1,5 @@
 # EventSource client for EventMachine
 
-This is currently a work in progress.
-
 See the specification: http://dev.w3.org/html5/eventsource/
 
 ## Install
@@ -93,6 +91,7 @@ source.inactivity_timeout = 120 # in seconds (default: 60).
 
 MIT License
 
+Copyright (C) 2012 by François de Metz
 Copyright (C) 2011 by af83
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
