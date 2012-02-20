@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name             = "em-eventsource"
-  s.version          = "0.1.6"
+  s.version          = "0.1.7"
   s.date             = Time.now.utc.strftime("%Y-%m-%d")
   s.homepage         = "http://github.com/AF83/em-eventsource"
   s.authors          = "François de Metz"
