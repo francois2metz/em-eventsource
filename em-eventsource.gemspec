@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name             = "em-eventsource"
-  s.version          = "0.1.5"
+  s.version          = "0.1.6"
   s.date             = Time.now.utc.strftime("%Y-%m-%d")
-  s.homepage         = "http://github.com/af83/em-eventsource"
+  s.homepage         = "http://github.com/AF83/em-eventsource"
   s.authors          = "François de Metz"
-  s.email            = "francois.de.metz@af83.com"
+  s.email            = "francois@2metz.fr"
   s.description      =  <<-EOF
      em-eventsource is an eventmachine library to consume Server-Sent Events streaming API.
      You can find the specification here: http://dev.w3.org/html5/eventsource/
