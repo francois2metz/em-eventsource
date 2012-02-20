@@ -87,7 +87,7 @@ module EventMachine
     # Cancel subscription
     def close
       @ready_state = CLOSED
-      @req.close
+      @req.close if @req
     end
 
     protected

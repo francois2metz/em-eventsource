@@ -189,4 +189,8 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "doesn't fail when trying to close not yet started source" do
+    EventMachine::EventSource.new("").close
+  end
+
 end
