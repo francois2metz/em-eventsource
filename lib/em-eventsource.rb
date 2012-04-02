@@ -87,13 +87,13 @@ module EventMachine
     # Cancel subscription
     def close
       @ready_state = CLOSED
-      @req.close if @req
+      @conn.close('requested') if @conn
     end
 
     protected
 
     def listen
-      @req = prepare_request
+      @conn, @req = prepare_request
       @req.errback do
         next if @ready_state == CLOSED
         @ready_state = CONNECTING
@@ -164,8 +164,8 @@ module EventMachine
       }
       headers = @headers.merge({'Cache-Control' => 'no-cache'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
-      conn.get({ :query => @query,
-                 :head  => headers})
+      [conn, conn.get({ :query => @query,
+                        :head  => headers})]
     end
   end
 end

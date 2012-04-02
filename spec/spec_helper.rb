@@ -46,7 +46,7 @@ module EventMachine
       @headers.each { |header| header.call(headers) }
     end
 
-    def close
+    def close(reason)
       # do nothing
     end
   end
