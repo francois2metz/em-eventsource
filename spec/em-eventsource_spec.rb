@@ -154,6 +154,26 @@ describe EventMachine::EventSource do
     end
   end
 
+  it "reconnect after callback with last-event-id" do
+    start_source do |source, req|
+      req.stream_data("id: roger\n\n")
+      source.error do |error|
+        error.must_equal "Connection lost. Reconnecting."
+        source.ready_state.must_equal EM::EventSource::CONNECTING
+        EM.add_timer(4) do
+          req2 = source.instance_variable_get "@req"
+          refute_same(req2, req)
+          source.last_event_id.must_equal "roger"
+          req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                   "Cache-Control" => "no-cache" },
+                                        :query => {} })
+          EM.stop
+        end
+      end
+      req.call_callback
+    end
+  end
+
   it "handle retry event" do
     start_source do |source ,req|
       req.stream_data("retry: plop\n\n")

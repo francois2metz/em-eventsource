@@ -8,6 +8,7 @@ module EventMachine
       @url = url
       @streams = []
       @errors = []
+      @callbacks = []
       @headers = []
       @middlewares = []
       @opts = opts
@@ -26,6 +27,10 @@ module EventMachine
       @errors << block
     end
 
+    def callback(&block)
+      @callbacks << block
+    end
+
     def use(*args, &block)
       @middlewares << [*args, block]
     end
@@ -40,6 +45,10 @@ module EventMachine
 
     def call_errback
       @errors.each { |error| error.call() }
+    end
+
+    def call_callback
+      @callbacks.each { |callback| callback.call() }
     end
 
     def call_headers(headers)
