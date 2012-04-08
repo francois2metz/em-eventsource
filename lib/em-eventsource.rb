@@ -94,14 +94,8 @@ module EventMachine
 
     def listen
       @conn, @req = prepare_request
-      @req.errback do
-        next if @ready_state == CLOSED
-        @ready_state = CONNECTING
-        @errors.each { |error| error.call("Connection lost. Reconnecting.") }
-        EM.add_timer(@retry) do
-          listen
-        end
-      end
+      @req.errback(&method(:handle_reconnect))
+      @req.callback(&method(:handle_reconnect))
       @req.headers do |headers|
         if headers.status != 200
           close
@@ -124,6 +118,15 @@ module EventMachine
           stream = buffer.slice!(0..index)
           handle_stream(stream)
         end
+      end
+    end
+
+    def handle_reconnect(*args)
+      return if @ready_state == CLOSED
+      @ready_state = CONNECTING
+      @errors.each { |error| error.call("Connection lost. Reconnecting.") }
+      EM.add_timer(@retry) do
+        listen
       end
     end
 
