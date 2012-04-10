@@ -121,7 +121,7 @@ module EventMachine
       end
     end
 
-    def handle_reconnect
+    def handle_reconnect(*args)
       return if @ready_state == CLOSED
       @ready_state = CONNECTING
       @errors.each { |error| error.call("Connection lost. Reconnecting.") }

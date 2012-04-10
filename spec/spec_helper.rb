@@ -48,7 +48,7 @@ module EventMachine
     end
 
     def call_callback
-      @callbacks.each { |callback| callback.call() }
+      @callbacks.each { |callback| callback.call("chunk of data") }
     end
 
     def call_headers(headers)
