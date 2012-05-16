@@ -111,22 +111,9 @@ module EventMachine
 
     def listen
       @conn, @req = prepare_request
+      @req.headers(&method(:handle_headers))
       @req.errback(&method(:handle_reconnect))
       @req.callback(&method(:handle_reconnect))
-      @req.headers do |headers|
-        if headers.status != 200
-          close
-          @errors.each { |error| error.call("Unexpected response status #{headers.status}") }
-          next
-        end
-        if /^text\/event-stream/.match headers['CONTENT_TYPE']
-          @ready_state = OPEN
-          @opens.each { |open| open.call }
-        else
-          close
-          @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
-        end
-      end
       buffer = ""
       @req.stream do |chunk|
         buffer += chunk
@@ -144,6 +131,21 @@ module EventMachine
       @errors.each { |error| error.call("Connection lost. Reconnecting.") }
       EM.add_timer(@retry) do
         listen
+      end
+    end
+
+    def handle_headers(headers)
+      if headers.status != 200
+        close
+        @errors.each { |error| error.call("Unexpected response status #{headers.status}") }
+        return
+      end
+      if /^text\/event-stream/.match headers['CONTENT_TYPE']
+        @ready_state = OPEN
+        @opens.each { |open| open.call }
+      else
+        close
+        @errors.each { |error| error.call("The content-type '#{headers['CONTENT_TYPE']}' is not text/event-stream") }
       end
     end
 
