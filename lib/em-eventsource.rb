@@ -28,11 +28,12 @@ module EventMachine
     OPEN       = 1
     # The connection is not open, and the user agent is not trying to reconnect. Either there was a fatal error or the close() method was invoked.
     CLOSED     = 2
+
     # Create a new stream
     #
-    # @param [String] url
-    # @param [Hash] query
-    # @param [Hash] headers
+    # url - the url as string
+    # query - the query string as hash
+    # headers - the headers for the request as hash
     def initialize(url, query={}, headers={})
       @url = url
       @query = query
@@ -51,40 +52,56 @@ module EventMachine
     end
 
     # Add open event handler
+    #
+    # Returns nothing
     def open(&block)
       @opens << block
     end
 
     # Add a specific event handler
     #
-    # @param [String] name of event
+    # name - name of event
+    #
+    # Returns nothing
     def on(name, &block)
       @on[name] ||= []
       @on[name] << block
     end
 
     # Add message event handler
+    #
+    # Returns nothing
     def message(&block)
       @messages << block
     end
 
     # Add error event handler
+    #
+    # Returns nothing
     def error(&block)
       @errors << block
     end
 
     # Add a middleware
+    #
+    # *args - the middleware class
+    #
+    # Returns nothing
     def use(*args, &block)
       @middlewares << (args << block)
     end
 
     # Start subscription
+    #
+    # Returns nothing
     def start
       @ready_state = CONNECTING
       listen
     end
 
     # Cancel subscription
+    #
+    # Returns nothing
     def close
       @ready_state = CLOSED
       @conn.close('requested') if @conn
