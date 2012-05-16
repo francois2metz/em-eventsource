@@ -29,7 +29,8 @@ describe EventMachine::EventSource do
       req.url.must_equal "http://example.com/streaming"
       req.opts[:inactivity_timeout].must_equal 60
       req.get_args[0].must_equal({ :query => {},
-                                   :head  => {"Cache-Control" => "no-cache"} })
+                                   :head  => {"Cache-Control" => "no-cache",
+                                              "Accept" => "text/event-stream"} })
       EM.stop
     end
   end
@@ -38,7 +39,9 @@ describe EventMachine::EventSource do
     start_source "http://example.net/streaming", {:chuck => "norris"}, {"DNT" => 1} do |source, req|
       req.url.must_equal "http://example.net/streaming"
       req.get_args[0].must_equal({ :query => {:chuck => "norris"},
-                                   :head  => {"DNT" => 1, "Cache-Control" => "no-cache"} })
+                                   :head  => {"DNT" => 1,
+                                              "Cache-Control" => "no-cache",
+                                              "Accept" => "text/event-stream"} })
       EM.stop
     end
   end
@@ -145,6 +148,7 @@ describe EventMachine::EventSource do
           refute_same(req2, req)
           source.last_event_id.must_equal "roger"
           req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                   "Accept" => "text/event-stream",
                                                    "Cache-Control" => "no-cache" },
                                         :query => {} })
           EM.stop
@@ -165,6 +169,7 @@ describe EventMachine::EventSource do
           refute_same(req2, req)
           source.last_event_id.must_equal "roger"
           req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                   "Accept" => "text/event-stream",
                                                    "Cache-Control" => "no-cache" },
                                         :query => {} })
           EM.stop

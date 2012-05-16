@@ -184,7 +184,7 @@ module EventMachine
         block = middleware.pop
         conn.use *middleware, &block
       }
-      headers = @headers.merge({'Cache-Control' => 'no-cache'})
+      headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
       [conn, conn.get({ :query => @query,
                         :head  => headers})]
