@@ -153,20 +153,20 @@ module EventMachine
       data = ""
       name = nil
       stream.split("\n").each do |part|
-        /^data:(.+)$/.match(part) do |m|
-          data += m[1].strip
-          data += "\n"
-        end
-        /^id:(.+)$/.match(part) do |m|
-          @last_event_id = m[1].strip
-        end
-        /^event:(.+)$/.match(part) do |m|
-          name = m[1].strip
-        end
-        /^retry:(.+)$/.match(part) do |m|
-          if m[1].strip! =~ /^[0-9]+$/
-            @retry = m[1].to_i
-          end
+        case part
+          when /^data:(.+)$/
+            data += $~[1].strip
+            data += "\n"
+
+          when /^id:(.+)$/
+            @last_event_id = $~[1].strip
+
+
+          when /^event:(.+)$/
+            name = $~[1].strip
+
+          when /^retry:(.+)$/
+            @retry = $~[1].to_i if $~[1].strip! =~ /^[0-9]+$/
         end
       end
       return if data.empty?
