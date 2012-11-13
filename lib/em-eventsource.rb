@@ -107,6 +107,14 @@ module EventMachine
       @conn.close('requested') if @conn
     end
 
+    # Gracefully reconnect
+    def reconnect
+      close
+      EM.add_timer(@retry) do
+        start
+      end
+    end
+
     protected
 
     def listen
@@ -136,7 +144,7 @@ module EventMachine
 
     def handle_headers(headers)
       if headers.status != 200
-        close
+        reconnect
         @errors.each { |error| error.call("Unexpected response status #{headers.status}") }
         return
       end
