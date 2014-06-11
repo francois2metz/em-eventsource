@@ -181,7 +181,7 @@ module EventMachine
       conn = EM::HttpRequest.new(@url, :inactivity_timeout => @inactivity_timeout)
       @middlewares.each { |middleware|
         block = middleware.pop
-        conn.use *middleware, &block
+        conn.use(*middleware, &block)
       }
       headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
