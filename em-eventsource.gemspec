@@ -19,6 +19,7 @@ EOF
   s.add_dependency "eventmachine", ">= 1.0.0.beta3"
   s.add_dependency "em-http-request", ">= 1.0.0"
   s.add_development_dependency "minitest", ">= 2.0"
+  s.add_development_dependency "minitest-spec-context"
   s.add_development_dependency "bundler"
   s.add_development_dependency "rake"
 end
