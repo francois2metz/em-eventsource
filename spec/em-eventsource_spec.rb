@@ -3,6 +3,7 @@
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require "minitest/autorun"
+require "minitest-spec-context"
 
 describe EventMachine::EventSource do
 
@@ -79,7 +80,7 @@ describe EventMachine::EventSource do
     end
   end
 
- it "connect without error with 200 and good content-type" do
+  it "connect without error with 200 and good content-type" do
     start_source do |source, req|
       source.error do
         assert false
@@ -93,101 +94,105 @@ describe EventMachine::EventSource do
     end
   end
 
-  it "connect and handle message" do
-    start_source do |source, req|
-      source.message do |message|
-        message.must_equal "hello world"
-        source.close
-        EM.stop
+  {"LF" => "\n", "CRLF" => "\r\n"}.each do |eol_desc, eol|
+    context "with #{eol_desc} EOL" do
+      it "connect and handle message" do
+        start_source do |source, req|
+          source.message do |message|
+            message.must_equal "hello world"
+            source.close
+            EM.stop
+          end
+          req.stream_data("data: hello world#{eol}#{eol}")
+        end
       end
-      req.stream_data("data: hello world\n\n")
-    end
-  end
 
-  it "handle multiple messages" do
-    start_source do |source, req|
-      source.message do |message|
-        message.must_equal "hello world\nplop"
-        source.close
-        EM.stop
+      it "handle multiple messages" do
+        start_source do |source, req|
+          source.message do |message|
+            message.must_equal "hello world\nplop"
+            source.close
+            EM.stop
+          end
+          req.stream_data("data: hello world#{eol}data:plop#{eol}#{eol}")
+        end
       end
-      req.stream_data("data: hello world\ndata:plop\n\n")
-    end
-  end
 
-  it "ignore empty message" do
-    start_source do |source, req|
-      source.message do |message|
-        message.must_equal "hello world"
-        EM.stop
+      it "ignore empty message" do
+        start_source do |source, req|
+          source.message do |message|
+            message.must_equal "hello world"
+            EM.stop
+          end
+          req.stream_data(":#{eol}#{eol}")
+          req.stream_data("data: hello world#{eol}#{eol}")
+        end
       end
-      req.stream_data(":\n\n")
-      req.stream_data("data: hello world\n\n")
-    end
-  end
 
-  it "handle event name" do
-    start_source do |source, req|
-      source.on "plop" do |message|
-        message.must_equal "hello world"
-        source.close
-        EM.stop
+      it "handle event name" do
+        start_source do |source, req|
+          source.on "plop" do |message|
+            message.must_equal "hello world"
+            source.close
+            EM.stop
+          end
+          req.stream_data("data: hello world#{eol}event:plop#{eol}#{eol}")
+        end
       end
-      req.stream_data("data: hello world\nevent:plop\n\n")
-    end
-  end
 
-  it "reconnect after error with last-event-id" do
-    start_source do |source, req|
-      req.stream_data("id: roger\n\n")
-      source.error do |error|
-        error.must_equal "Connection lost. Reconnecting."
-        source.ready_state.must_equal EM::EventSource::CONNECTING
-        EM.add_timer(4) do
-          req2 = source.instance_variable_get "@req"
-          refute_same(req2, req)
-          source.last_event_id.must_equal "roger"
-          req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
-                                                   "Accept" => "text/event-stream",
-                                                   "Cache-Control" => "no-cache" },
-                                        :query => {} })
+      it "reconnect after error with last-event-id" do
+        start_source do |source, req|
+          req.stream_data("id: roger#{eol}#{eol}")
+          source.error do |error|
+            error.must_equal "Connection lost. Reconnecting."
+            source.ready_state.must_equal EM::EventSource::CONNECTING
+            EM.add_timer(4) do
+              req2 = source.instance_variable_get "@req"
+              refute_same(req2, req)
+              source.last_event_id.must_equal "roger"
+              req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                       "Accept" => "text/event-stream",
+                                                       "Cache-Control" => "no-cache" },
+                                            :query => {} })
+              EM.stop
+            end
+          end
+          req.call_errback
+        end
+      end
+
+      it "reconnect after callback with last-event-id" do
+        start_source do |source, req|
+          req.stream_data("id: roger#{eol}#{eol}")
+          source.error do |error|
+            error.must_equal "Connection lost. Reconnecting."
+            source.ready_state.must_equal EM::EventSource::CONNECTING
+            EM.add_timer(4) do
+              req2 = source.instance_variable_get "@req"
+              refute_same(req2, req)
+              source.last_event_id.must_equal "roger"
+              req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
+                                                       "Accept" => "text/event-stream",
+                                                       "Cache-Control" => "no-cache" },
+                                            :query => {} })
+              EM.stop
+            end
+          end
+          req.call_callback
+        end
+      end
+
+      it "handle retry event" do
+        start_source do |source ,req|
+          req.stream_data("retry: plop#{eol}#{eol}")
+          source.retry.must_equal 3
+          req.stream_data("retry: 45plop#{eol}#{eol}")
+          source.retry.must_equal 3
+          req.stream_data("retry: 45#{eol}#{eol}")
+          source.retry.must_equal 45
           EM.stop
         end
       end
-      req.call_errback
-    end
-  end
-
-  it "reconnect after callback with last-event-id" do
-    start_source do |source, req|
-      req.stream_data("id: roger\n\n")
-      source.error do |error|
-        error.must_equal "Connection lost. Reconnecting."
-        source.ready_state.must_equal EM::EventSource::CONNECTING
-        EM.add_timer(4) do
-          req2 = source.instance_variable_get "@req"
-          refute_same(req2, req)
-          source.last_event_id.must_equal "roger"
-          req2.get_args[0].must_equal({ :head => { "Last-Event-Id" => "roger",
-                                                   "Accept" => "text/event-stream",
-                                                   "Cache-Control" => "no-cache" },
-                                        :query => {} })
-          EM.stop
-        end
-      end
-      req.call_callback
-    end
-  end
-
-  it "handle retry event" do
-    start_source do |source ,req|
-      req.stream_data("retry: plop\n\n")
-      source.retry.must_equal 3
-      req.stream_data("retry: 45plop\n\n")
-      source.retry.must_equal 3
-      req.stream_data("retry: 45\n\n")
-      source.retry.must_equal 45
-      EM.stop
     end
   end
 

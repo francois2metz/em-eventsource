@@ -21,6 +21,7 @@ GEM
     eventmachine (1.0.3)
     http_parser.rb (0.6.0)
     minitest (5.3.4)
+    minitest-spec-context (0.0.3)
     rake (10.3.2)
 
 PLATFORMS
@@ -30,4 +31,5 @@ DEPENDENCIES
   bundler
   em-eventsource!
   minitest (>= 2.0)
+  minitest-spec-context
   rake

@@ -117,8 +117,7 @@ module EventMachine
       buffer = ""
       @req.stream do |chunk|
         buffer += chunk
-        # TODO: manage \r, \r\n, \n
-        while index = buffer.index("\n\n")
+        while index = buffer.index(/\r\n\r\n|\n\n/)
           stream = buffer.slice!(0..index)
           handle_stream(stream)
         end
@@ -152,7 +151,7 @@ module EventMachine
     def handle_stream(stream)
       data = ""
       name = nil
-      stream.split("\n").each do |part|
+      stream.split(/\r?\n/).each do |part|
         /^data:(.+)$/.match(part) do |m|
           data += m[1].strip
           data += "\n"
@@ -170,7 +169,7 @@ module EventMachine
         end
       end
       return if data.empty?
-      data.chomp!("\n")
+      data.chomp!
       if name.nil?
         @messages.each { |message| message.call(data) }
       else
@@ -182,7 +181,7 @@ module EventMachine
       conn = EM::HttpRequest.new(@url, :inactivity_timeout => @inactivity_timeout)
       @middlewares.each { |middleware|
         block = middleware.pop
-        conn.use *middleware, &block
+        conn.use(*middleware, &block)
       }
       headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
