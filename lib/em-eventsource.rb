@@ -170,10 +170,10 @@ module EventMachine
       end
       return if data.empty?
       data.chomp!
-      if name.nil?
-        @messages.each { |message| message.call(data) }
+      if @on[name].nil?
+         @messages.each { |message| message.call(data) }
       else
-        @on[name].each { |message| message.call(data) } if not @on[name].nil?
+        @on[name].each { |message| message.call(data) } 
       end
     end
 
