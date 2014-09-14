@@ -171,7 +171,7 @@ module EventMachine
       return if data.empty?
       data.chomp!
       if @on[name].nil?
-         @messages.each { |message| message.call(data) }
+         @messages.each { |name, message| message.call(name, data) }
       else
         @on[name].each { |message| message.call(data) } 
       end
