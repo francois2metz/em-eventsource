@@ -3,7 +3,7 @@ PATH
   specs:
     em-eventsource (0.2.0)
       em-http-request (>= 1.0.0)
-      eventmachine (>= 1.0.0.beta3)
+      eventmachine (~> 1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -18,7 +18,7 @@ GEM
       http_parser.rb (>= 0.6.0)
     em-socksify (0.3.0)
       eventmachine (>= 1.0.0.beta.4)
-    eventmachine (1.0.3)
+    eventmachine (1.0.7)
     http_parser.rb (0.6.0)
     minitest (5.3.4)
     minitest-spec-context (0.0.3)
@@ -33,3 +33,6 @@ DEPENDENCIES
   minitest (>= 2.0)
   minitest-spec-context
   rake
+
+BUNDLED WITH
+   1.10.5
