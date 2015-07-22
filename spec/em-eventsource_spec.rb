@@ -206,6 +206,73 @@ describe EventMachine::EventSource do
       req2.middlewares.must_equal [["oup", "la", "boom", proc]]
       EM.stop
     end
+
+    start_source do |source ,req|
+      proc = Proc.new {}
+      source.use "oup", &proc
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["oup", proc]]
+      EM.stop
+    end
+
+    start_source do |source ,req|
+      proc = Proc.new {}
+      source.use "oup", nil, nil, &proc
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["oup", nil, nil, proc]]
+      EM.stop
+    end
+
+    start_source do |source ,req|
+      source.use "oup"
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["oup", nil]]
+      EM.stop
+    end
+
+    start_source do |source ,req|
+      source.use "oup", "la", "boom"
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["oup", "la", "boom", nil]]
+      EM.stop
+    end
+
+    start_source do |source ,req|
+      source.use("oup", "la", "boom") do
+        true
+      end
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.size.must_equal 1
+      req2.middlewares[0].size.must_equal 4
+      req2.middlewares[0][0..2].must_equal ["oup", "la", "boom"]
+      req2.middlewares[0][3].class.must_equal Proc
+      EM.stop
+    end
+  end
+
+  it "keeps connection middlewares calls the same" do
+    start_source do |source ,req|
+      source.use "Keep", "me", "equal"
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["Keep", "me", "equal", nil]]
+      source.close
+      source.start
+      req2 = source.instance_variable_get "@req"
+      req2.middlewares.must_equal [["Keep", "me", "equal", nil]]
+      EM.stop
+    end
   end
 
   it "allows to set the inactivity_timeout" do

@@ -88,7 +88,8 @@ module EventMachine
     #
     # Returns nothing
     def use(*args, &block)
-      @middlewares << (args << block)
+      block = args.pop if block.nil? && block_given?
+      @middlewares << [args, block]
     end
 
     # Start subscription
@@ -179,9 +180,12 @@ module EventMachine
 
     def prepare_request
       conn = EM::HttpRequest.new(@url, :inactivity_timeout => @inactivity_timeout)
-      @middlewares.each { |middleware|
-        block = middleware.pop
-        conn.use(*middleware, &block)
+      @middlewares.each { |middleware, block|
+        if block
+          conn.use(*middleware, &block)
+        else
+          conn.use(*middleware)
+        end
       }
       headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
