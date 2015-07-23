@@ -10,7 +10,7 @@ Install with Rubygems:
 
 If you use bundler, add it to your Gemfile:
 
-    gem "em-eventsource", "~>0.1.2"
+    gem "em-eventsource", "~> 0.2.0"
 
 ## Usage
 
