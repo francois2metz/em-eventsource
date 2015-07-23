@@ -60,7 +60,11 @@ source.close
 Current status of the connection:
 
 ```ruby
-source.ready_state # Can be EM::EventSource::CLOSED, EM::EventSource::CONNECTING, EM::EventSource::OPEN
+# Can be:
+# - EM::EventSource::CLOSED
+# - EM::EventSource::CONNECTING
+# - EM::EventSource::OPEN
+source.ready_state
 ```
 
 Override the default retry value (if the connection is lost):
