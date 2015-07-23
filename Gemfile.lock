@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    em-eventsource (0.2.0)
+    em-eventsource (0.2.1)
       em-http-request (~> 1.0)
       eventmachine (~> 1.0)
 
@@ -33,6 +33,3 @@ DEPENDENCIES
   minitest (>= 2.0)
   minitest-spec-context
   rake
-
-BUNDLED WITH
-   1.10.5
