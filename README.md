@@ -1,6 +1,6 @@
 # EventSource client for EventMachine
 
-See the specification: http://dev.w3.org/html5/eventsource/
+See the specification: https://html.spec.whatwg.org/multipage/server-sent-events.html
 
 ## Install
 
