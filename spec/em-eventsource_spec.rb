@@ -100,7 +100,7 @@ describe EventMachine::EventSource do
     context "with #{eol_desc} EOL" do
       it "connect and handle message" do
         start_source do |source, req|
-          source.message do |message|
+          source.message do |name, message|
             message.must_equal "hello world"
             source.close
             EM.stop
@@ -111,7 +111,7 @@ describe EventMachine::EventSource do
 
       it "handle multiple messages" do
         start_source do |source, req|
-          source.message do |message|
+          source.message do |name, message|
             message.must_equal "hello world\nplop"
             source.close
             EM.stop
@@ -122,7 +122,7 @@ describe EventMachine::EventSource do
 
       it "ignore empty message" do
         start_source do |source, req|
-          source.message do |message|
+          source.message do |name, message|
             message.must_equal "hello world"
             EM.stop
           end
