@@ -8,20 +8,22 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.3.8)
-    cookiejar (0.3.2)
-    em-http-request (1.1.2)
+    addressable (2.5.2)
+      public_suffix (>= 2.0.2, < 4.0)
+    cookiejar (0.3.3)
+    em-http-request (1.1.5)
       addressable (>= 2.3.4)
-      cookiejar
+      cookiejar (!= 0.3.1)
       em-socksify (>= 0.3)
       eventmachine (>= 1.0.3)
       http_parser.rb (>= 0.6.0)
-    em-socksify (0.3.0)
+    em-socksify (0.3.2)
       eventmachine (>= 1.0.0.beta.4)
-    eventmachine (1.0.7)
+    eventmachine (1.2.7)
     http_parser.rb (0.6.0)
     minitest (5.3.4)
     minitest-spec-context (0.0.3)
+    public_suffix (3.0.2)
     rake (10.3.2)
 
 PLATFORMS
@@ -33,3 +35,6 @@ DEPENDENCIES
   minitest (>= 2.0)
   minitest-spec-context
   rake
+
+BUNDLED WITH
+   1.16.1
