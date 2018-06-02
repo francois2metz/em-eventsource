@@ -11,8 +11,7 @@ require 'em-eventsource'
 
 EM.run do
   source = EM::EventSource.new("https://#{token}:@stream.flowdock.com/flows/#{organization}/#{flow}",
-                               {query: 'text/event-stream'},
-                               {'Accept' => 'text/event-stream'})
+                               {query: 'text/event-stream'})
 
   source.message do |message|
     puts "new message #{message}"
