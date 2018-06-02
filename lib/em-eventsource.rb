@@ -21,6 +21,8 @@ module EventMachine
     attr_reader :inactivity_timeout
     # Set the inactivity timeout
     attr_writer :inactivity_timeout
+    # Set the max_redirects
+    attr_writer :max_redirects
     # Ready state
     # The connection has not yet been established, or it was closed and the user agent is reconnecting.
     CONNECTING = 0
@@ -43,6 +45,7 @@ module EventMachine
       @last_event_id = nil
       @retry = 3 # seconds
       @inactivity_timeout = 60 # seconds
+      @max_redirects = 5
 
       @opens = []
       @errors = []
@@ -135,6 +138,9 @@ module EventMachine
     end
 
     def handle_headers(headers)
+      if headers.redirection?
+        return
+      end
       if headers.status != 200
         close
         @errors.each { |error| error.call("Unexpected response status #{headers.status}") }
@@ -190,8 +196,9 @@ module EventMachine
       headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
       headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
       [conn, conn.get({ query: @query,
+                        redirects: @max_redirects,
                         head: headers,
-                        keepalive: true })]
+                        keepalive: true})]
     end
   end
 end

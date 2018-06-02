@@ -32,7 +32,8 @@ describe EventMachine::EventSource do
       req.get_args[0].must_equal({ query: {},
                                    head: {"Cache-Control" => "no-cache",
                                           "Accept" => "text/event-stream"},
-                                   keepalive: true })
+                                   keepalive: true,
+                                   redirects: 5 })
       EM.stop
     end
   end
@@ -44,7 +45,8 @@ describe EventMachine::EventSource do
                                    head: {"DNT" => 1,
                                           "Cache-Control" => "no-cache",
                                           "Accept" => "text/event-stream"},
-                                   keepalive: true })
+                                   keepalive: true,
+                                   redirects: 5 })
       EM.stop
     end
   end
@@ -92,6 +94,20 @@ describe EventMachine::EventSource do
         assert true
         EM.stop
       end
+      req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
+    end
+  end
+
+  it "follow redirect" do
+    start_source do |source, req|
+      source.error do
+        assert false
+      end
+      source.open do
+        assert true
+        EM.stop
+      end
+      req.call_headers(create_response_headers "302", "", {'Location' => "http://example.com/streaming2"})
       req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
     end
   end
@@ -156,7 +172,8 @@ describe EventMachine::EventSource do
                                                     "Accept" => "text/event-stream",
                                                     "Cache-Control" => "no-cache" },
                                             query: {},
-                                            keepalive: true })
+                                            keepalive: true,
+                                            redirects: 5})
               EM.stop
             end
           end
@@ -178,7 +195,8 @@ describe EventMachine::EventSource do
                                                     "Accept" => "text/event-stream",
                                                     "Cache-Control" => "no-cache" },
                                             query: {},
-                                            keepalive: true })
+                                            keepalive: true,
+                                            redirects: 5 })
               EM.stop
             end
           end
