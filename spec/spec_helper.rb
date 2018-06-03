@@ -2,7 +2,7 @@ require "em-eventsource"
 
 module EventMachine
   class MockHttpRequest
-    attr_reader :url, :get_args, :middlewares, :opts
+    attr_reader :url, :get_args, :middlewares, :opts, :response_header, :closed
 
     def initialize(url, opts={})
       @url = url
@@ -12,6 +12,8 @@ module EventMachine
       @headers = []
       @middlewares = []
       @opts = opts
+      @response_header = HttpResponseHeader.new({})
+      @closed = false
     end
 
     def get(*args)
@@ -52,11 +54,12 @@ module EventMachine
     end
 
     def call_headers(headers)
+      @response_header = headers
       @headers.each { |header| header.call(headers) }
     end
 
-    def close(reason)
-      # do nothing
+    def close(reason="")
+      @closed = true
     end
   end
 

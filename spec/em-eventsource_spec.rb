@@ -32,8 +32,7 @@ describe EventMachine::EventSource do
       req.get_args[0].must_equal({ query: {},
                                    head: {"Cache-Control" => "no-cache",
                                           "Accept" => "text/event-stream"},
-                                   keepalive: true,
-                                   redirects: 5 })
+                                   keepalive: true })
       EM.stop
     end
   end
@@ -45,8 +44,7 @@ describe EventMachine::EventSource do
                                    head: {"DNT" => 1,
                                           "Cache-Control" => "no-cache",
                                           "Accept" => "text/event-stream"},
-                                   keepalive: true,
-                                   redirects: 5 })
+                                   keepalive: true })
       EM.stop
     end
   end
@@ -107,8 +105,17 @@ describe EventMachine::EventSource do
         assert true
         EM.stop
       end
-      req.call_headers(create_response_headers "302", "", {'Location' => "http://example.com/streaming2"})
+      req.call_headers(create_response_headers "302", "", {'LOCATION' => "http://example.com/streaming2"})
+      assert req.closed
+      req.call_callback
+      req2 = source.instance_variable_get "@req"
+      refute_same(req2, req)
+      req2.get_args[0].must_equal({ head: { "Accept" => "text/event-stream",
+                                            "Cache-Control" => "no-cache" },
+                                    query: {},
+                                    keepalive: true })
       req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
+      source.url.must_equal "http://example.com/streaming2"
     end
   end
 
@@ -160,6 +167,7 @@ describe EventMachine::EventSource do
 
       it "reconnect after error with last-event-id" do
         start_source do |source, req|
+          req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
           req.stream_data("id: roger#{eol}#{eol}")
           source.error do |error|
             error.must_equal "Connection lost. Reconnecting."
@@ -172,8 +180,7 @@ describe EventMachine::EventSource do
                                                     "Accept" => "text/event-stream",
                                                     "Cache-Control" => "no-cache" },
                                             query: {},
-                                            keepalive: true,
-                                            redirects: 5})
+                                            keepalive: true })
               EM.stop
             end
           end
@@ -183,6 +190,7 @@ describe EventMachine::EventSource do
 
       it "reconnect after callback with last-event-id" do
         start_source do |source, req|
+          req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
           req.stream_data("id: roger#{eol}#{eol}")
           source.error do |error|
             error.must_equal "Connection lost. Reconnecting."
@@ -195,8 +203,7 @@ describe EventMachine::EventSource do
                                                     "Accept" => "text/event-stream",
                                                     "Cache-Control" => "no-cache" },
                                             query: {},
-                                            keepalive: true,
-                                            redirects: 5 })
+                                            keepalive: true })
               EM.stop
             end
           end
