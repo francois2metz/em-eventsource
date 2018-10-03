@@ -176,7 +176,7 @@ module EventMachine
         end
         /^retry:(.+)$/.match(part) do |m|
           if m[1].strip! =~ /^[0-9]+$/
-            @retry = m[1].to_i
+            @retry = m[1].to_i / 1000
           end
         end
       end

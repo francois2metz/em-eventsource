@@ -217,8 +217,10 @@ describe EventMachine::EventSource do
           source.retry.must_equal 3
           req.stream_data("retry: 45plop#{eol}#{eol}")
           source.retry.must_equal 3
-          req.stream_data("retry: 45#{eol}#{eol}")
-          source.retry.must_equal 45
+          req.stream_data("retry: 1000#{eol}#{eol}")
+          source.retry.must_equal 1
+          req.stream_data("retry: 400#{eol}#{eol}")
+          source.retry.must_equal 0
           EM.stop
         end
       end
