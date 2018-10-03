@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    em-eventsource (0.2.5)
+    em-eventsource (0.3.0)
       em-http-request (~> 1.0)
       eventmachine (~> 1.0)
 
@@ -23,7 +23,7 @@ GEM
     http_parser.rb (0.6.0)
     minitest (5.3.4)
     minitest-spec-context (0.0.3)
-    public_suffix (3.0.2)
+    public_suffix (3.0.3)
     rake (10.3.2)
 
 PLATFORMS
