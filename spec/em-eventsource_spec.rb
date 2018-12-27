@@ -154,6 +154,17 @@ describe EventMachine::EventSource do
         end
       end
 
+      it "removes characters that are not UTF-8" do
+        start_source do |source, req|
+          source.message do |message|
+            message.must_equal "foo?bar"
+            source.close
+            EM.stop
+          end
+          req.stream_data("data: foo\xE4bar#{eol}#{eol}")
+        end
+      end
+
       it "handle event name" do
         start_source do |source, req|
           source.on "plop" do |message|
