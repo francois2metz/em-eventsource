@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    em-eventsource (0.3.0)
+    em-eventsource (0.3.1)
       em-http-request (~> 1.0)
       eventmachine (~> 1.0)
 
@@ -37,4 +37,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   1.16.1
+   1.17.1
