@@ -117,6 +117,9 @@ module EventMachine
       @req.callback(&method(:handle_reconnect))
       buffer = ""
       @req.stream do |chunk|
+        unless chunk.valid_encoding?
+          chunk.scrub!('?')
+        end
         buffer += chunk
         while index = buffer.index(/\r\n\r\n|\n\n/)
           stream = buffer.slice!(0..index)
