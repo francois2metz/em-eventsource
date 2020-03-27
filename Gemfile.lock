@@ -24,7 +24,7 @@ GEM
     minitest (5.3.4)
     minitest-spec-context (0.0.3)
     public_suffix (3.0.3)
-    rake (10.3.2)
+    rake (12.3.3)
 
 PLATFORMS
   ruby
