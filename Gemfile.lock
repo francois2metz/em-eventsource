@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    em-eventsource (0.3.1)
+    em-eventsource (0.3.2)
       em-http-request (~> 1.0)
       eventmachine (~> 1.0)
 
