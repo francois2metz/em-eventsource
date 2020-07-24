@@ -193,7 +193,7 @@ module EventMachine
     end
 
     def prepare_request
-      conn = EM::HttpRequest.new(@url, inactivity_timeout: @inactivity_timeout)
+      conn = EM::HttpRequest.new(@url, {tls: {verify_peer: true}, inactivity_timeout: @inactivity_timeout})
       @middlewares.each do |middleware, block|
         if block
           conn.use(*middleware, &block)
