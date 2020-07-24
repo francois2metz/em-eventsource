@@ -25,11 +25,11 @@ describe EventMachine::EventSource do
 
   it "connect to the good server" do
     start_source do |source, req|
-      source.ready_state.must_equal EM::EventSource::CONNECTING
-      source.url.must_equal "http://example.com/streaming"
-      req.url.must_equal "http://example.com/streaming"
-      req.opts[:inactivity_timeout].must_equal 60
-      req.get_args[0].must_equal({ query: {},
+      _(source.ready_state).must_equal EM::EventSource::CONNECTING
+      _(source.url).must_equal "http://example.com/streaming"
+      _(req.url).must_equal "http://example.com/streaming"
+      _(req.opts[:inactivity_timeout]).must_equal 60
+      _(req.get_args[0]).must_equal({ query: {},
                                    head: {"Cache-Control" => "no-cache",
                                           "Accept" => "text/event-stream"},
                                    keepalive: true })
@@ -39,12 +39,12 @@ describe EventMachine::EventSource do
 
   it "connect to the good server with query and headers" do
     start_source "http://example.net/streaming", {:chuck => "norris"}, {"DNT" => 1} do |source, req|
-      req.url.must_equal "http://example.net/streaming"
-      req.get_args[0].must_equal({ query: {:chuck => "norris"},
-                                   head: {"DNT" => 1,
-                                          "Cache-Control" => "no-cache",
-                                          "Accept" => "text/event-stream"},
-                                   keepalive: true })
+      _(req.url).must_equal "http://example.net/streaming"
+      _(req.get_args[0]).must_equal({ query: {:chuck => "norris"},
+                                      head: {"DNT" => 1,
+                                             "Cache-Control" => "no-cache",
+                                             "Accept" => "text/event-stream"},
+                                      keepalive: true })
       EM.stop
     end
   end
@@ -52,8 +52,8 @@ describe EventMachine::EventSource do
   it "connect and error if status != 200" do
     start_source do |source, req|
       source.error do |error|
-        error.must_equal "Unexpected response status 400"
-        source.ready_state.must_equal EM::EventSource::CLOSED
+        _(error).must_equal "Unexpected response status 400"
+        _(source.ready_state).must_equal EM::EventSource::CLOSED
         EM.stop
       end
       source.open { assert false }
@@ -64,8 +64,8 @@ describe EventMachine::EventSource do
   it "connect and error if the content-type doens't match text/event-stream" do
     start_source do |source, req|
       source.error do |error|
-        error.must_equal "The content-type 'text/plop' is not text/event-stream"
-        source.ready_state.must_equal EM::EventSource::CLOSED
+        _(error).must_equal "The content-type 'text/plop' is not text/event-stream"
+        _(source.ready_state).must_equal EM::EventSource::CLOSED
         EM.stop
       end
       req.call_headers(create_response_headers "200", "text/plop")
@@ -75,7 +75,7 @@ describe EventMachine::EventSource do
   it "connect and error if the content-type is not set" do
     start_source do |source, req|
       source.error do |error|
-        error.must_equal "The content-type '' is not text/event-stream"
+        _(error).must_equal "The content-type '' is not text/event-stream"
         EM.stop
       end
       req.call_headers(create_response_headers "200", "", "HEADER_NAME" => "BAD")
@@ -88,7 +88,7 @@ describe EventMachine::EventSource do
         assert false
       end
       source.open do
-        source.ready_state.must_equal EM::EventSource::OPEN
+        _(source.ready_state).must_equal EM::EventSource::OPEN
         assert true
         EM.stop
       end
@@ -110,12 +110,12 @@ describe EventMachine::EventSource do
       req.call_callback
       req2 = source.instance_variable_get "@req"
       refute_same(req2, req)
-      req2.get_args[0].must_equal({ head: { "Accept" => "text/event-stream",
+      _(req2.get_args[0]).must_equal({ head: { "Accept" => "text/event-stream",
                                             "Cache-Control" => "no-cache" },
                                     query: {},
                                     keepalive: true })
       req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
-      source.url.must_equal "http://example.com/streaming2"
+      _(source.url).must_equal "http://example.com/streaming2"
     end
   end
 
@@ -124,7 +124,7 @@ describe EventMachine::EventSource do
       it "connect and handle message" do
         start_source do |source, req|
           source.message do |message|
-            message.must_equal "hello world"
+            _(message).must_equal "hello world"
             source.close
             EM.stop
           end
@@ -135,7 +135,7 @@ describe EventMachine::EventSource do
       it "handle multiple messages" do
         start_source do |source, req|
           source.message do |message|
-            message.must_equal "hello world\nplop"
+            _(message).must_equal "hello world\nplop"
             source.close
             EM.stop
           end
@@ -146,7 +146,7 @@ describe EventMachine::EventSource do
       it "ignore empty message" do
         start_source do |source, req|
           source.message do |message|
-            message.must_equal "hello world"
+            _(message).must_equal "hello world"
             EM.stop
           end
           req.stream_data(":#{eol}#{eol}")
@@ -157,7 +157,7 @@ describe EventMachine::EventSource do
       it "removes characters that are not UTF-8" do
         start_source do |source, req|
           source.message do |message|
-            message.must_equal "foo?bar"
+            _(message).must_equal "foo?bar"
             source.close
             EM.stop
           end
@@ -168,7 +168,7 @@ describe EventMachine::EventSource do
       it "handle event name" do
         start_source do |source, req|
           source.on "plop" do |message|
-            message.must_equal "hello world"
+            _(message).must_equal "hello world"
             source.close
             EM.stop
           end
@@ -181,17 +181,17 @@ describe EventMachine::EventSource do
           req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
           req.stream_data("id: roger#{eol}#{eol}")
           source.error do |error|
-            error.must_equal "Connection lost. Reconnecting."
-            source.ready_state.must_equal EM::EventSource::CONNECTING
+            _(error).must_equal "Connection lost. Reconnecting."
+            _(source.ready_state).must_equal EM::EventSource::CONNECTING
             EM.add_timer(4) do
               req2 = source.instance_variable_get "@req"
               refute_same(req2, req)
-              source.last_event_id.must_equal "roger"
-              req2.get_args[0].must_equal({ head: { "Last-Event-Id" => "roger",
-                                                    "Accept" => "text/event-stream",
-                                                    "Cache-Control" => "no-cache" },
-                                            query: {},
-                                            keepalive: true })
+              _(source.last_event_id).must_equal "roger"
+              _(req2.get_args[0]).must_equal({ head: { "Last-Event-Id" => "roger",
+                                                       "Accept" => "text/event-stream",
+                                                       "Cache-Control" => "no-cache" },
+                                               query: {},
+                                               keepalive: true })
               EM.stop
             end
           end
@@ -204,17 +204,17 @@ describe EventMachine::EventSource do
           req.call_headers(create_response_headers "200", "text/event-stream; charset=utf-8")
           req.stream_data("id: roger#{eol}#{eol}")
           source.error do |error|
-            error.must_equal "Connection lost. Reconnecting."
-            source.ready_state.must_equal EM::EventSource::CONNECTING
+            _(error).must_equal "Connection lost. Reconnecting."
+            _(source.ready_state).must_equal EM::EventSource::CONNECTING
             EM.add_timer(4) do
               req2 = source.instance_variable_get "@req"
               refute_same(req2, req)
-              source.last_event_id.must_equal "roger"
-              req2.get_args[0].must_equal({ head: { "Last-Event-Id" => "roger",
-                                                    "Accept" => "text/event-stream",
-                                                    "Cache-Control" => "no-cache" },
-                                            query: {},
-                                            keepalive: true })
+              _(source.last_event_id).must_equal "roger"
+              _(req2.get_args[0]).must_equal({ head: { "Last-Event-Id" => "roger",
+                                                       "Accept" => "text/event-stream",
+                                                       "Cache-Control" => "no-cache" },
+                                               query: {},
+                                               keepalive: true })
               EM.stop
             end
           end
@@ -225,13 +225,13 @@ describe EventMachine::EventSource do
       it "handle retry event" do
         start_source do |source ,req|
           req.stream_data("retry: plop#{eol}#{eol}")
-          source.retry.must_equal 3
+          _(source.retry).must_equal 3
           req.stream_data("retry: 45plop#{eol}#{eol}")
-          source.retry.must_equal 3
+          _(source.retry).must_equal 3
           req.stream_data("retry: 1000#{eol}#{eol}")
-          source.retry.must_equal 1
+          _(source.retry).must_equal 1
           req.stream_data("retry: 400#{eol}#{eol}")
-          source.retry.must_equal 0
+          _(source.retry).must_equal 0
           EM.stop
         end
       end
@@ -245,7 +245,7 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["oup", "la", "boom", proc]]
+      _(req2.middlewares).must_equal [["oup", "la", "boom", proc]]
       EM.stop
     end
 
@@ -255,7 +255,7 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["oup", proc]]
+      _(req2.middlewares).must_equal [["oup", proc]]
       EM.stop
     end
 
@@ -265,7 +265,7 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["oup", nil, nil, proc]]
+      _(req2.middlewares).must_equal [["oup", nil, nil, proc]]
       EM.stop
     end
 
@@ -274,7 +274,7 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["oup", nil]]
+      _(req2.middlewares).must_equal [["oup", nil]]
       EM.stop
     end
 
@@ -283,7 +283,7 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["oup", "la", "boom", nil]]
+      _(req2.middlewares).must_equal [["oup", "la", "boom", nil]]
       EM.stop
     end
 
@@ -294,10 +294,10 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.size.must_equal 1
-      req2.middlewares[0].size.must_equal 4
-      req2.middlewares[0][0..2].must_equal ["oup", "la", "boom"]
-      req2.middlewares[0][3].class.must_equal Proc
+      _(req2.middlewares.size).must_equal 1
+      _(req2.middlewares[0].size).must_equal 4
+      _(req2.middlewares[0][0..2]).must_equal ["oup", "la", "boom"]
+      _(req2.middlewares[0][3].class).must_equal Proc
       EM.stop
     end
   end
@@ -308,11 +308,11 @@ describe EventMachine::EventSource do
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["Keep", "me", "equal", nil]]
+      _(req2.middlewares).must_equal [["Keep", "me", "equal", nil]]
       source.close
       source.start
       req2 = source.instance_variable_get "@req"
-      req2.middlewares.must_equal [["Keep", "me", "equal", nil]]
+      _(req2.middlewares).must_equal [["Keep", "me", "equal", nil]]
       EM.stop
     end
   end
@@ -323,7 +323,7 @@ describe EventMachine::EventSource do
       source.inactivity_timeout = 0
       source.start
       req = source.instance_variable_get "@req"
-      req.opts[:inactivity_timeout].must_equal 0
+      _(req.opts[:inactivity_timeout]).must_equal 0
       EM.stop
     end
   end
