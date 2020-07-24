@@ -35,6 +35,7 @@ module EventMachine
     # query - the query string as hash
     # headers - the headers for the request as hash
     def initialize(url, query={}, headers={})
+      @conn = nil
       @url = url
       @query = query
       @headers = headers
