@@ -189,7 +189,7 @@ module EventMachine
       if name.nil?
         @messages.each { |message| message.call(data) }
       else
-        @on[name].each { |message| message.call(data) } if not @on[name].nil?
+        @on[name].each { |message| message.call(data) } unless @on[name].nil?
       end
     end
 
@@ -203,7 +203,7 @@ module EventMachine
         end
       end
       headers = @headers.merge({'Cache-Control' => 'no-cache', 'Accept' => 'text/event-stream'})
-      headers.merge!({'Last-Event-Id' => @last_event_id }) if not @last_event_id.nil?
+      headers.merge!({'Last-Event-Id' => @last_event_id }) unless @last_event_id.nil?
       [conn, conn.get({ query: @query,
                         head: headers,
                         keepalive: true })]
